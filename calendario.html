@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Calendário</title>
+</head>
+<body>
+  <h1>Calendário</h1>
+  <ul id="lista"></ul>
+
+  <script>
+    // ID da sua planilha
+    const sheetID = "1Kwh0QZIesB1CVOkZY8uh648mxWzvFx7AZ91ziyMQIQ0";
+    const url = `https://docs.google.com/spreadsheets/d/1Kwh0QZIesB1CVOkZY8uh648mxWzvFx7AZ91ziyMQIQ0/gviz/tq?tqx=out:json`;
+
+    fetch(url)
+      .then(res => res.text())
+      .then(data => {
+        // O Google retorna um texto extra, precisamos limpar
+        const json = JSON.parse(data.substr(47).slice(0, -2));
+        const rows = json.table.rows;
+
+        const lista = document.getElementById("lista");
+
+        rows.forEach(row => {
+          const dataEvento = row.c[0]?.v || "";
+          const evento = row.c[1]?.v || "";
+          const descricao = row.c[2]?.v || "";
+
+          const li = document.createElement("li");
+          li.textContent = `${dataEvento} - ${evento}: ${descricao}`;
+          lista.appendChild(li);
+        });
+      })
+      .catch(err => {
+        console.error("Erro ao carregar dados:", err);
+      });
+  </script>
+</body>
+</html>
