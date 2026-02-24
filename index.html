@@ -106,6 +106,15 @@
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
+
+    if (window.__dexterCalendarAuthInit) {
+      console.warn("App de autenticação já inicializado. Ignorando nova inicialização.");
+    } else {
+      window.__dexterCalendarAuthInit = true;
+
+      const supabaseUrl = "https://mssbrtjfwaxfmzxcpnyc.supabase.co";
+      const supabaseAnonKey = "sb_publishable_AditA8FjUDZ4C0FE6auKsQ_vDKvnrMF";
+
     const SUPABASE_URL = "https://mssbrtjfwaxfmzxcpnyc.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_AditA8FjUDZ4C0FE6auKsQ_vDKvnrMF";
 
@@ -176,11 +185,19 @@
       });
     }
 
+
+      if (supabaseUrl.includes("SEU-PROJETO") || supabaseAnonKey.includes("SUA-CHAVE")) {
+        setStatus("Configure SUPABASE_URL e SUPABASE_ANON_KEY no index.html.", true);
+        toggleArea(null);
+      } else {
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
     if (SUPABASE_URL.includes("SEU-PROJETO") || SUPABASE_ANON_KEY.includes("SUA-CHAVE")) {
       setStatus("Configure SUPABASE_URL e SUPABASE_ANON_KEY no index.html.", true);
       toggleArea(null);
     } else {
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 
       signupForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -262,6 +279,13 @@
 
         toggleArea(currentSession);
       });
+
+
+        const { data: { session } } = await supabase.auth.getSession();
+        currentSession = session;
+        hasConfirmedLogin = false;
+        toggleArea(currentSession);
+      }
 
       const { data: { session } } = await supabase.auth.getSession();
       currentSession = session;
