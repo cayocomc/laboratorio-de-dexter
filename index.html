@@ -54,8 +54,6 @@
       display: none;
     }
 
-
-
     #auth-area,
     #confirm-area,
     #calendar-area {
@@ -65,37 +63,17 @@
     #login-indicator {
       font-weight: 700;
       margin: .4rem 0 1rem;
-
-
-    #auth-area {
-      margin-bottom: 2rem;
-
-
     }
   </style>
 </head>
 <body>
   <h1>Calendário</h1>
 
-
   <p id="login-indicator" aria-live="polite">🔒 Não autenticado</p>
 
   <section id="auth-area">
     <h2>Tela inicial</h2>
     <p>Faça login para desbloquear o calendário.</p>
-
-
-
-
-  <section id="auth-area">
-
-    <h2>Tela inicial</h2>
-    <p>Faça login para desbloquear o calendário.</p>
-
-    <p>Faça login para ver os eventos.</p>
-
-
-
 
     <form id="signup-form">
       <h2>Criar conta</h2>
@@ -112,21 +90,14 @@
     </form>
   </section>
 
-
-
-
-
-
-
   <section id="confirm-area" class="hidden">
     <h2>Confirmação de login</h2>
     <p id="confirm-text"></p>
     <button id="confirm-login-btn" type="button">Confirmar entrada</button>
   </section>
 
-
   <section id="calendar-area" class="hidden">
-    <button id="logout-btn">Sair</button>
+    <button id="logout-btn" type="button">Sair</button>
     <h2>Eventos</h2>
     <ul id="lista"></ul>
   </section>
@@ -136,88 +107,30 @@
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-
-    const SUPABASE_URL = "https://mssbrtjfwaxfmzxcpnyc.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_AditA8FjUDZ4C0FE6auKsQ_vDKvnrMF";
-
-
-
-    const SUPABASE_URL = "https://mssbrtjfwaxfmzxcpnyc.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_AditA8FjUDZ4C0FE6auKsQ_vDKvnrMF";
-
-    // Troque pelos dados reais do seu projeto Supabase.
-
-    const SUPABASE_URL = "https://mssbrtjfwaxfmzxcpnyc.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_AditA8FjUDZ4C0FE6auKsQ_vDKvnrMF";
-
-
-    const SUPABASE_URL = "https://mssbrtjfwaxfmzxcpnyc.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_AditA8FjUDZ4C0FE6auKsQ_vDKvnrMF";
-
     const SUPABASE_URL = "https://SEU-PROJETO.supabase.co";
     const SUPABASE_ANON_KEY = "SUA-CHAVE-ANON";
 
-
-
-
-
-    if (SUPABASE_URL.includes("SEU-PROJETO") || SUPABASE_ANON_KEY.includes("SUA-CHAVE")) {
-      setStatus("Configure SUPABASE_URL e SUPABASE_ANON_KEY no index.html.", true);
-      throw new Error("Credenciais do Supabase não configuradas");
-    }
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     const authArea = document.getElementById("auth-area");
     const calendarArea = document.getElementById("calendar-area");
-
-
-
     const confirmArea = document.getElementById("confirm-area");
     const confirmText = document.getElementById("confirm-text");
     const confirmLoginBtn = document.getElementById("confirm-login-btn");
     const loginIndicator = document.getElementById("login-indicator");
-
     const lista = document.getElementById("lista");
     const statusEl = document.getElementById("status");
-
-
-    const lista = document.getElementById("lista");
-    const statusEl = document.getElementById("status");
-
-
-
     const signupForm = document.getElementById("signup-form");
     const loginForm = document.getElementById("login-form");
     const logoutBtn = document.getElementById("logout-btn");
 
-
-
-    const confirmArea = document.getElementById("confirm-area");
-    const confirmText = document.getElementById("confirm-text");
-    const confirmLoginBtn = document.getElementById("confirm-login-btn");
-
-
-
     const urlPlanilha = "https://docs.google.com/spreadsheets/d/1Kwh0QZIesB1CVOkZY8uh648mxWzvFx7AZ91ziyMQIQ0/gviz/tq?tqx=out:json";
     let hasConfirmedLogin = false;
     let currentSession = null;
-
-
-
-
-    const urlPlanilha = "https://docs.google.com/spreadsheets/d/1Kwh0QZIesB1CVOkZY8uh648mxWzvFx7AZ91ziyMQIQ0/gviz/tq?tqx=out:json";
-
-
 
     function setStatus(message, isError = false) {
       statusEl.textContent = message;
       statusEl.classList.toggle("error", isError);
       statusEl.classList.toggle("success", !isError && Boolean(message));
     }
-
-
-
 
     function updateLoginIndicator(session) {
       if (!session) {
@@ -238,30 +151,12 @@
       authArea.classList.toggle("hidden", logged);
       confirmArea.classList.toggle("hidden", !logged || hasConfirmedLogin);
       calendarArea.classList.toggle("hidden", !logged || !hasConfirmedLogin);
+
+      if (logged && !hasConfirmedLogin) {
+        confirmText.textContent = `Login detectado para ${session.user.email}. Clique em confirmar para abrir o calendário.`;
+      }
+
       updateLoginIndicator(session);
-
-
-      if (logged && !hasConfirmedLogin) {
-        confirmText.textContent = `Login detectado para ${session.user.email}. Clique em confirmar para abrir o calendário.`;
-      }
-
-    function toggleArea(session) {
-      const logged = Boolean(session);
-      authArea.classList.toggle("hidden", logged);
-
-      confirmArea.classList.toggle("hidden", !logged || hasConfirmedLogin);
-      calendarArea.classList.toggle("hidden", !logged || !hasConfirmedLogin);
-
-
-      if (logged && !hasConfirmedLogin) {
-        confirmText.textContent = `Login detectado para ${session.user.email}. Clique em confirmar para abrir o calendário.`;
-      }
-
-
-      calendarArea.classList.toggle("hidden", !logged);
-
-
-
     }
 
     async function carregarCalendario() {
@@ -271,7 +166,7 @@
       const json = JSON.parse(data.substring(47).slice(0, -2));
       const rows = json.table.rows;
 
-      rows.forEach(row => {
+      rows.forEach((row) => {
         const dataEvento = row.c[0]?.v || "";
         const evento = row.c[1]?.v || "";
         const descricao = row.c[2]?.v || "";
@@ -282,179 +177,99 @@
       });
     }
 
-    signupForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      setStatus("Criando conta...");
-
-      const email = document.getElementById("signup-email").value.trim();
-      const password = document.getElementById("signup-password").value;
-
-      const { error } = await supabase.auth.signUp({ email, password });
-
-      if (error) {
-        setStatus(error.message, true);
-        return;
-      }
-
-      setStatus("Conta criada! Verifique seu e-mail para confirmar o cadastro.");
-      signupForm.reset();
-    });
-
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      setStatus("Entrando...");
-
-      const email = document.getElementById("login-email").value.trim();
-      const password = document.getElementById("login-password").value;
-
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        setStatus(error.message, true);
-        return;
-      }
-
-
-      setStatus("Login com sucesso. Agora confirme a entrada para abrir o calendário.");
-
-
-      setStatus("Login com sucesso. Agora confirme a entrada para abrir o calendário.");
-
-      setStatus("Login realizado. Falta confirmar a entrada.");
-
-
-      loginForm.reset();
-    });
-
-    confirmLoginBtn.addEventListener("click", async () => {
-      if (!currentSession) {
-        setStatus("Sessão inválida. Faça login novamente.", true);
-        return;
-      }
-
-      hasConfirmedLogin = true;
-      toggleArea(currentSession);
-      try {
-        await carregarCalendario();
-
-        setStatus("✅ Login confirmado com sucesso.");
-
-
-        setStatus("✅ Login confirmado com sucesso.");
-
-        setStatus("Login confirmado com sucesso.");
-
-
-      } catch (error) {
-        setStatus(`Falha ao carregar eventos: ${error.message}`, true);
-      }
-    });
-
-
-
-
-      setStatus("Login realizado com sucesso.");
-      loginForm.reset();
-    });
-
-
-
-
-    logoutBtn.addEventListener("click", async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        setStatus(error.message, true);
-        return;
-      }
-
-
-
-      hasConfirmedLogin = false;
-      currentSession = null;
+    if (SUPABASE_URL.includes("SEU-PROJETO") || SUPABASE_ANON_KEY.includes("SUA-CHAVE")) {
+      setStatus("Configure SUPABASE_URL e SUPABASE_ANON_KEY no index.html.", true);
       toggleArea(null);
-      setStatus("Você saiu da conta.");
-    });
+    } else {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    supabase.auth.onAuthStateChange((event, session) => {
+      signupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        setStatus("Criando conta...");
 
-      const previousUserId = currentSession?.user?.id;
-      const nextUserId = session?.user?.id;
-      const isSameUser = Boolean(previousUserId && nextUserId && previousUserId === nextUserId);
+        const email = document.getElementById("signup-email").value.trim();
+        const password = document.getElementById("signup-password").value;
+        const { error } = await supabase.auth.signUp({ email, password });
 
-      if (event === "SIGNED_OUT" || !session) {
-
-      if (event === "SIGNED_IN") {
-        currentSession = session;
-        hasConfirmedLogin = false;
-        setStatus("Login com sucesso. Confirme a entrada para continuar.");
-      } else if (event === "SIGNED_OUT" || !session) {
-
-        currentSession = null;
-        hasConfirmedLogin = false;
-      } else {
-        currentSession = session;
-
-        if (event === "SIGNED_IN" && !isSameUser) {
-          hasConfirmedLogin = false;
-          setStatus("Login com sucesso. Confirme a entrada para continuar.");
+        if (error) {
+          setStatus(error.message, true);
+          return;
         }
-      }
 
-      toggleArea(currentSession);
+        setStatus("Conta criada! Verifique seu e-mail para confirmar o cadastro.");
+        signupForm.reset();
+      });
 
-      }
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        setStatus("Entrando...");
 
-      toggleArea(currentSession);
+        const email = document.getElementById("login-email").value.trim();
+        const password = document.getElementById("login-password").value;
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
 
+        if (error) {
+          setStatus(error.message, true);
+          return;
+        }
 
-      hasConfirmedLogin = false;
-      currentSession = null;
+        setStatus("Login com sucesso. Agora confirme a entrada para abrir o calendário.");
+        loginForm.reset();
+      });
 
-      setStatus("Você saiu da conta.");
-    });
+      confirmLoginBtn.addEventListener("click", async () => {
+        if (!currentSession) {
+          setStatus("Sessão inválida. Faça login novamente.", true);
+          return;
+        }
 
-    supabase.auth.onAuthStateChange(async (_event, session) => {
+        hasConfirmedLogin = true;
+        toggleArea(currentSession);
 
-      currentSession = session;
-      hasConfirmedLogin = false;
-      toggleArea(session);
-
-
-    });
-
-    const { data: { session } } = await supabase.auth.getSession();
-    currentSession = session;
-    hasConfirmedLogin = false;
-
-    toggleArea(currentSession);
-
-
-    toggleArea(currentSession);
-
-    toggleArea(session);
-
-      toggleArea(session);
-      if (session) {
         try {
           await carregarCalendario();
+          setStatus("✅ Login confirmado com sucesso.");
         } catch (error) {
           setStatus(`Falha ao carregar eventos: ${error.message}`, true);
         }
-      }
-    });
+      });
 
-    const { data: { session } } = await supabase.auth.getSession();
-    toggleArea(session);
-    if (session) {
-      try {
-        await carregarCalendario();
-      } catch (error) {
-        setStatus(`Falha ao carregar eventos: ${error.message}`, true);
-      }
+      logoutBtn.addEventListener("click", async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+          setStatus(error.message, true);
+          return;
+        }
+
+        hasConfirmedLogin = false;
+        currentSession = null;
+        toggleArea(null);
+        setStatus("Você saiu da conta.");
+      });
+
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (event === "SIGNED_OUT" || !session) {
+          currentSession = null;
+          hasConfirmedLogin = false;
+          toggleArea(null);
+          return;
+        }
+
+        currentSession = session;
+
+        if (event === "SIGNED_IN") {
+          hasConfirmedLogin = false;
+          setStatus("Login com sucesso. Confirme a entrada para continuar.");
+        }
+
+        toggleArea(currentSession);
+      });
+
+      const { data: { session } } = await supabase.auth.getSession();
+      currentSession = session;
+      hasConfirmedLogin = false;
+      toggleArea(currentSession);
     }
-
-
-
   </script>
 </body>
 </html>
