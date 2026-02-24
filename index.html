@@ -2,39 +2,212 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Calendário</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      max-width: 760px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      line-height: 1.4;
+    }
+
+    form {
+      display: grid;
+      gap: .5rem;
+      margin-bottom: 1rem;
+      border: 1px solid #999;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    input,
+    button {
+      padding: .6rem;
+      font-size: 1rem;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .status {
+      min-height: 1.5rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .error {
+      color: #d33;
+    }
+
+    .success {
+      color: #2d7;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #auth-area {
+      margin-bottom: 2rem;
+    }
+  </style>
 </head>
 <body>
   <h1>Calendário</h1>
-  <ul id="lista"></ul>
 
-  <script>
-    // ID da sua planilha
-    const sheetID = "1Kwh0QZIesB1CVOkZY8uh648mxWzvFx7AZ91ziyMQIQ0";
-    const url = `https://docs.google.com/spreadsheets/d/1Kwh0QZIesB1CVOkZY8uh648mxWzvFx7AZ91ziyMQIQ0/gviz/tq?tqx=out:json`;
+  <section id="auth-area">
+    <p>Faça login para ver os eventos.</p>
 
-    fetch(url)
-      .then(res => res.text())
-      .then(data => {
-        // O Google retorna um texto extra, precisamos limpar
-        const json = JSON.parse(data.substr(47).slice(0, -2));
-        const rows = json.table.rows;
+    <form id="signup-form">
+      <h2>Criar conta</h2>
+      <input id="signup-email" type="email" placeholder="Email" required>
+      <input id="signup-password" type="password" placeholder="Senha (mínimo 6 caracteres)" minlength="6" required>
+      <button type="submit">Cadastrar</button>
+    </form>
 
-        const lista = document.getElementById("lista");
+    <form id="login-form">
+      <h2>Entrar</h2>
+      <input id="login-email" type="email" placeholder="Email" required>
+      <input id="login-password" type="password" placeholder="Senha" required>
+      <button type="submit">Entrar</button>
+    </form>
+  </section>
 
-        rows.forEach(row => {
-          const dataEvento = row.c[0]?.v || "";
-          const evento = row.c[1]?.v || "";
-          const descricao = row.c[2]?.v || "";
+  <section id="calendar-area" class="hidden">
+    <button id="logout-btn">Sair</button>
+    <h2>Eventos</h2>
+    <ul id="lista"></ul>
+  </section>
 
-          const li = document.createElement("li");
-          li.textContent = `${dataEvento} - ${evento}: ${descricao}`;
-          lista.appendChild(li);
-        });
-      })
-      .catch(err => {
-        console.error("Erro ao carregar dados:", err);
+  <p id="status" class="status" aria-live="polite"></p>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    // Troque pelos dados reais do seu projeto Supabase.
+    const SUPABASE_URL = "https://SEU-PROJETO.supabase.co";
+    const SUPABASE_ANON_KEY = "SUA-CHAVE-ANON";
+
+    if (SUPABASE_URL.includes("SEU-PROJETO") || SUPABASE_ANON_KEY.includes("SUA-CHAVE")) {
+      setStatus("Configure SUPABASE_URL e SUPABASE_ANON_KEY no index.html.", true);
+      throw new Error("Credenciais do Supabase não configuradas");
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const authArea = document.getElementById("auth-area");
+    const calendarArea = document.getElementById("calendar-area");
+    const lista = document.getElementById("lista");
+    const statusEl = document.getElementById("status");
+
+    const signupForm = document.getElementById("signup-form");
+    const loginForm = document.getElementById("login-form");
+    const logoutBtn = document.getElementById("logout-btn");
+
+    const urlPlanilha = "https://docs.google.com/spreadsheets/d/1Kwh0QZIesB1CVOkZY8uh648mxWzvFx7AZ91ziyMQIQ0/gviz/tq?tqx=out:json";
+
+    function setStatus(message, isError = false) {
+      statusEl.textContent = message;
+      statusEl.classList.toggle("error", isError);
+      statusEl.classList.toggle("success", !isError && Boolean(message));
+    }
+
+    function toggleArea(session) {
+      const logged = Boolean(session);
+      authArea.classList.toggle("hidden", logged);
+      calendarArea.classList.toggle("hidden", !logged);
+    }
+
+    async function carregarCalendario() {
+      lista.innerHTML = "";
+      const res = await fetch(urlPlanilha);
+      const data = await res.text();
+      const json = JSON.parse(data.substring(47).slice(0, -2));
+      const rows = json.table.rows;
+
+      rows.forEach(row => {
+        const dataEvento = row.c[0]?.v || "";
+        const evento = row.c[1]?.v || "";
+        const descricao = row.c[2]?.v || "";
+
+        const li = document.createElement("li");
+        li.textContent = `${dataEvento} - ${evento}: ${descricao}`;
+        lista.appendChild(li);
       });
+    }
+
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setStatus("Criando conta...");
+
+      const email = document.getElementById("signup-email").value.trim();
+      const password = document.getElementById("signup-password").value;
+
+      const { error } = await supabase.auth.signUp({ email, password });
+
+      if (error) {
+        setStatus(error.message, true);
+        return;
+      }
+
+      setStatus("Conta criada! Verifique seu e-mail para confirmar o cadastro.");
+      signupForm.reset();
+    });
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      setStatus("Entrando...");
+
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        setStatus(error.message, true);
+        return;
+      }
+
+      setStatus("Login realizado com sucesso.");
+      loginForm.reset();
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        setStatus(error.message, true);
+        return;
+      }
+      setStatus("Você saiu da conta.");
+    });
+
+    supabase.auth.onAuthStateChange(async (_event, session) => {
+      toggleArea(session);
+      if (session) {
+        try {
+          await carregarCalendario();
+        } catch (error) {
+          setStatus(`Falha ao carregar eventos: ${error.message}`, true);
+        }
+      }
+    });
+
+    const { data: { session } } = await supabase.auth.getSession();
+    toggleArea(session);
+    if (session) {
+      try {
+        await carregarCalendario();
+      } catch (error) {
+        setStatus(`Falha ao carregar eventos: ${error.message}`, true);
+      }
+    }
   </script>
 </body>
 </html>
