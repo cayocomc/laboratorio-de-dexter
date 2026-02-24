@@ -92,8 +92,13 @@
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
     // Troque pelos dados reais do seu projeto Supabase.
+
+    const SUPABASE_URL = "https://mssbrtjfwaxfmzxcpnyc.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_AditA8FjUDZ4C0FE6auKsQ_vDKvnrMF";
+
     const SUPABASE_URL = "https://SEU-PROJETO.supabase.co";
     const SUPABASE_ANON_KEY = "SUA-CHAVE-ANON";
+
 
     if (SUPABASE_URL.includes("SEU-PROJETO") || SUPABASE_ANON_KEY.includes("SUA-CHAVE")) {
       setStatus("Configure SUPABASE_URL e SUPABASE_ANON_KEY no index.html.", true);
